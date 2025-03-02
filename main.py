@@ -2,7 +2,19 @@ import json
 import pathlib
 import datetime
 import sys
-from sortedcontainers import SortedDict
+
+class SortedDict(dict):
+    def __iter__(self):
+        return iter(sorted(super().keys()))
+    
+    def keys(self):
+        return sorted(super().keys())
+    
+    def items(self):
+        return [(key, self[key]) for key in sorted(super().keys())]
+    
+    def values(self):
+        return [self[key] for key in sorted(super().keys())]
 
 class task_manager():
     
