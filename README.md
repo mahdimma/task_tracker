@@ -33,6 +33,7 @@ The Task Tracker CLI enables you to:
   ```sh
   git clone https://github.com/mahdimma/task_tracker.git
   cd task_tracker
+  chmod +x task-cli
   ```
 
 ### 2. Installation
