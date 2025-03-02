@@ -1,0 +1,145 @@
+import json
+import pathlib
+import datetime
+import sys
+from sortedcontainers import SortedDict
+
+class task_manager():
+    
+    def __init__(self):
+        self._tasks = SortedDict()
+        self._nextID = 1
+        self._displayHeader = ['ID', 'description', 'status', 'createdAt', 'updatedAt']
+        self._displayFromat= f"{self._displayHeader[0]:<5} {self._displayHeader[1]:<20} {self._displayHeader[2]:<15} {self._displayHeader[3]:<28} {self._displayHeader[4]:<20}\n"
+        self._restore()
+        
+    def _restore(self):
+        if not pathlib.Path('tasks.json').exists():
+            return
+        else:
+            with open('tasks.json', 'r') as saves:
+                savedLoad = json.loads('\n'.join(saves.readlines()))
+                for id in savedLoad:
+                    self._nextID = self._nextID + 1 if int(id) == self._nextID else self._nextID 
+                    id = str(id)
+                    self._tasks[str(id)]= {'description': savedLoad[id]['description'],
+                                        'status': savedLoad[id]['status'],
+                                        'createdAt': savedLoad[id]['createdAt'],
+                                        'updatedAt': savedLoad[id]['updatedAt']}
+    
+    def _save(self):
+        with open('tasks.json','w') as save:
+            save.writelines(json.dumps(self._tasks))
+            
+    def __iadd__(self, task):
+        self._tasks[str(self._nextID)]= {}
+        self._tasks[str(self._nextID)]['description']= task
+        self._tasks[str(self._nextID)]['status']= 'todo'
+        self._tasks[str(self._nextID)]['createdAt']= str(datetime.datetime.now())
+        self._tasks[str(self._nextID)]['updatedAt']= "None"
+        self._nextID += 1
+        return self
+        
+    def __setitem__(self, key, item):
+        self._tasks[str(key)]['description'] = item
+        self._tasks[str(key)]['updatedAt'] = str(datetime.datetime.now())
+    
+    def markInProgress(self, key):
+        self._tasks[str(key)]['status'] = 'in-progress'
+        self._tasks[str(key)]['updatedAt'] = str(datetime.datetime.now())
+    
+    def markDone(self, key):
+        self._tasks[str(key)]['status'] = 'done'
+        self._tasks[str(key)]['updatedAt'] = str(datetime.datetime.now())
+        
+    def __repr__(self):
+        lines = '{'
+        for key in self._tasks.keys():
+            lines += f"{key}: {{{self._tasks[key]}}}\n"
+        lines = lines.removesuffix('\n')
+        lines += '}'
+        return lines
+    
+    def __delitem__(self, key):
+        del(self._tasks[str(key)])
+    
+    def __str__(self):
+        lines = 'All Tasks:\n'
+        lines += self._displayFromat
+        for key in self._tasks.keys():
+            lines += f"{str(key)+':':<5} {self._tasks[key][self._displayHeader[1]]:<20} {self._tasks[key][self._displayHeader[2]]:<15} {self._tasks[key][self._displayHeader[3]]:<28} {self._tasks[key][self._displayHeader[4]]:<20}\n"
+        lines = lines.removesuffix('\n')
+        return lines
+    
+    def displayDone(self):
+        lines = 'All Tasks Done:\n'
+        lines += self._displayFromat
+        for key in self._tasks.keys():
+            if self._tasks[key]['status'] == 'done':
+                lines += f"{str(key)+':':<5} {self._tasks[key][self._displayHeader[1]]:<20} {self._tasks[key][self._displayHeader[2]]:<15} {self._tasks[key][self._displayHeader[3]]:<28} {self._tasks[key][self._displayHeader[4]]:<20}\n"
+        lines = lines.removesuffix('\n')
+        print(lines)
+        
+    def displayNotDone(self):
+        lines = 'All Tasks Done:\n'
+        lines += self._displayFromat
+        for key in self._tasks.keys():
+            if self._tasks[key]['status'] != 'done':
+                lines += f"{str(key)+':':<5} {self._tasks[key][self._displayHeader[1]]:<20} {self._tasks[key][self._displayHeader[2]]:<15} {self._tasks[key][self._displayHeader[3]]:<28} {self._tasks[key][self._displayHeader[4]]:<20}\n"
+        lines = lines.removesuffix('\n')
+        print(lines)
+        
+    def displayInProgress(self):
+        lines = 'All Tasks Done:\n'
+        lines += self._displayFromat
+        for key in self._tasks.keys():
+            if self._tasks[key]['status'] == 'in-progress':
+                lines += f"{str(key)+':':<5} {self._tasks[key][self._displayHeader[1]]:<20} {self._tasks[key][self._displayHeader[2]]:<15} {self._tasks[key][self._displayHeader[3]]:<28} {self._tasks[key][self._displayHeader[4]]:<20}\n"
+        lines = lines.removesuffix('\n')
+        print(lines)
+    
+    def displayTodo(self):
+        lines = 'All Tasks Done:\n'
+        lines += self._displayFromat
+        for key in self._tasks.keys():
+            if self._tasks[key]['status'] == 'todo':
+                lines += f"{str(key)+':':<5} {self._tasks[key][self._displayHeader[1]]:<20} {self._tasks[key][self._displayHeader[2]]:<15} {self._tasks[key][self._displayHeader[3]]:<28} {self._tasks[key][self._displayHeader[4]]:<20}\n"
+        lines = lines.removesuffix('\n')
+        print(lines)
+    
+    def __exit__(self):
+        self._save()
+    
+if __name__=="__main__":
+    tasks = task_manager()
+    try:
+        if len(sys.argv) == 2 and sys.argv[1]=='list':
+            print(tasks)
+        elif len(sys.argv) == 3:
+            if sys.argv[1] == 'add':
+                tasks += sys.argv[2]
+            elif sys.argv[1] == 'delete':
+                del(tasks[sys.argv[2]])
+            elif sys.argv[1] == 'mark-in-progress':
+                tasks.markInProgress(sys.argv[2])
+            elif sys.argv[1] == 'mark-done':
+                tasks.markDone(sys.argv[2])
+            elif sys.argv[1]=='list':
+                if sys.argv[2] == 'done':
+                    tasks.displayDone()
+                elif sys.argv[2] == 'todo':
+                    tasks.displayTodo()
+                elif sys.argv[2] == 'no-Done':
+                    tasks.displayNotDone()
+                elif sys.argv[2] == 'in-progress':
+                    tasks.displayInProgress()
+                else:
+                    print('not correct format')
+        elif len(sys.argv) == 4 and sys.argv[1]=='update':
+            tasks[sys.argv[2]] = sys.argv[3]
+        else:
+            print('not correct format')
+    except Exception as e:
+        print('error', e)
+    finally:
+        tasks.__exit__()
