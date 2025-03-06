@@ -1,6 +1,6 @@
 # Task Tracker CLI
 
-Task Tracker is a simple command line interface (CLI) application to help you track and manage your tasks. It allows you to add, update, delete, and list tasks—all stored in a JSON file for persistence.
+Task Tracker is a simple command line interface (CLI) application to help you track and manage your tasks. It allows you to add, update, delete, and list tasks—all stored in a JSON file for persistence. start at [roadmap.sh](https://roadmap.sh/projects/task-tracker).
 
 ## Overview
 
@@ -33,6 +33,7 @@ The Task Tracker CLI enables you to:
   ```sh
   git clone https://github.com/mahdimma/task_tracker.git
   cd task_tracker
+  chmod +x task-cli
   ```
 
 ### 2. Installation
@@ -45,38 +46,38 @@ The CLI accepts commands as positional arguments. Below are some example command
 
 - **Add a new task:**
   ```sh
-  python task-cli add "Buy groceries"
+  task-cli add "Buy groceries"
   # Output: Task added successfully (ID: 1)
   ```
 
 - **Update a task:**
   ```sh
-  python task-cli update 1 "Buy groceries and cook dinner"
+  task-cli update 1 "Buy groceries and cook dinner"
   # Output: Task #1 updated successfully!
   ```
 
 - **Delete a task:**
   ```sh
-  python task-cli delete 1
+  task-cli delete 1
   # Output: Task #1 deleted successfully!
   ```
 
 - **Mark a task as in-progress or done:**
   ```sh
-  python task-cli mark-in-progress 1
+  task-cli mark-in-progress 1
   task-cli mark-done 1
   ```
 
 - **List all tasks:**
   ```sh
-  python task-cli list
+  task-cli list
   ```
 
 - **List tasks by status:**
   ```sh
-  python task-cli list done
-  python task-cli list todo
-  python task-cli list in-progress
+  task-cli list done
+  task-cli list todo
+  task-cli list in-progress
   ```
 
 ## Task Data Structure
